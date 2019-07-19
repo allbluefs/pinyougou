@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../plugins/angularjs/angular.min.js"></script>
+    <script>
+       var app=angular.module("myapp",[]);
+       app.controller("myctrl",function ($scope) {
+           $scope.add=function () {
+               $scope.z=parseInt($scope.x)+parseInt($scope.y);
+           }
+       })
+    </script>
+</head>
+<body ng-app="myapp" ng-controller="myctrl">
+    X:<input type="text" ng-model="x"><br>
+    Y:<input type="text" ng-model="y"><br>
+    <button ng-click="add()">相加</button>{{z}}
+</body>
+</html>

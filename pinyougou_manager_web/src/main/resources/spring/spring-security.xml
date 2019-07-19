@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security
+						http://www.springframework.org/schema/security/spring-security.xsd">
+	<!-- 以下页面不被拦截 -->
+	<http pattern="/login.html" security="none"></http>
+	<http pattern="/css/**" security="none"></http>
+	<http pattern="/img/**" security="none"></http>
+	<http pattern="/js/**" security="none"></http>
+	<http pattern="/plugins/**" security="none"></http>
+	
+	<!-- 页面拦截规则 -->
+	<http use-expressions="false">
+		<!-- pattern拦截请求规则  access：指定用户角色 注意：springsecurity角色定义时，必须以：ROLE_开头 -->
+		<intercept-url pattern="/**" access="ROLE_ADMIN" />
+		<!-- 配置登陆标签 login-page 登录页面属性default-target-url登录成功后，访问的请求
+		authentication-failure-forward-url 认证（登录）失败后跳转的页面
+		login-processing-url="/login" 默认登录地址
+		username-parameter="username" 默认用户名参数配置
+		username-parameter="password" 默认密码参数配置
+		always-use-default-target：一直使用默认登录成功后跳转的页面
+		-->
+		<form-login 
+		     login-page="/login.html" 
+		     default-target-url="/admin/index.html"
+			 authentication-failure-url="/login.html" 
+			 always-use-default-target="true" />
+		<!--跨域请求伪造安全机制，只能使用在能够提供session页面中  要使用csrf安全机制，只能使用jsp页面   禁用掉  -->
+		<csrf disabled="true" />
+
+		<!-- iframe策略 框架  policy="DENY" 拒绝页面中 <iframe>标签内容访问
+		 SAMEORIGIN 修改为同源策略可以访问
+		 	url:同一资源定位符 ：协议 、域名和端口号 完全相同时，才是同源
+		 		https://www.baidu.com
+		 		https://www.baidu.com/index.html
+		 -->
+		<headers>
+			<frame-options policy="SAMEORIGIN"/>
+		</headers>
+
+		<!--退出配置
+		logout-url="/logout"-->
+		<logout/>
+	</http>
+	
+	<!-- 认证管理器 -->
+	<authentication-manager>
+		<!--认证提供者-->
+		<authentication-provider>
+			<!--认证服务类-->
+			<user-service>
+				<user name="admin" password="123456" authorities="ROLE_ADMIN" />
+				<user name="sunwukong" password="dasheng" authorities="ROLE_ADMIN" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+</beans:beans>

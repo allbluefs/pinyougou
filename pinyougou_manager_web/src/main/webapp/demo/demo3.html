@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../plugins/angularjs/angular.min.js"></script>
+    <script>
+        //初始化定义模块
+        var app=angular.module("myapp",[]);
+        //定义控制器 需要先初始化模块
+        //参数一 控制器名称, 参数2::控制器需要处理的事情
+        app.controller("myctrl",function ($scope) {
+            // $scope.name="zhangsan";
+        })
+    </script>
+</head>
+<body ng-app="myapp" ng-controller="myctrl" ng-init="name='李四'">
+    用户名:<input type="text" ng-model="name">
+    <br>{{name}}
+</body>
+</html>

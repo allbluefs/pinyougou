@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../plugins/angularjs/angular.min.js"></script>
+    <script>
+       var app=angular.module("myapp",[]);
+       app.controller("myctrl",function ($scope,$http) {
+          $scope.findAll=function () {
+              $http.get("../brand/list.do").success(
+                  function (response) {
+                      $scope.list=response;
+                  }
+              )
+          }
+       })
+    </script>
+</head>
+<body ng-app="myapp" ng-controller="myctrl" ng-init="findAll()">
+    <table>
+        <tr>
+            <th>品牌id</th>
+            <th>品牌名称</th>
+            <th>品牌首字母</th>
+        </tr>
+        <tr ng-repeat="brand in list">
+            <td>{{brand.id}}</td>
+            <td>{{brand.name}}</td>
+            <td>{{brand.firstChar}}</td>
+        </tr>
+    </table>
+</body>
+</html>
