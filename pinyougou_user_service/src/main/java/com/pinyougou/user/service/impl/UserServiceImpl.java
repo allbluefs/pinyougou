@@ -75,6 +75,8 @@ public class UserServiceImpl implements UserService {
         user.setStatus("Y");
         user.setIsMobileCheck("1");
         userMapper.insert(user);
+        //注册成功后，清除redis中验证码
+        redisTemplate.delete(user.getPhone());
     }
 
 
