@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 			 `status` varchar(1) DEFAULT NULL COMMENT '使用状态（Y正常 N非正常）',
 			 `is_mobile_check` varchar(1) DEFAULT '0' COMMENT '手机是否验证 （0否  1是）',
 		*/
-        user.setPassword(DigestUtils.md2Hex(user.getPassword()));
+        user.setPassword(DigestUtils.md5Hex(user.getPassword()));
         user.setCreated(new Date());
         user.setUpdated(new Date());
         user.setSourceType("1");
