@@ -1,8 +1,10 @@
 package com.pinyougou.user.controller;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.pinyougou.user.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +13,6 @@ import com.pinyougou.pojo.TbUser;
 
 import entity.PageResult;
 import entity.Result;
-import utils.HttpClient;
 
 /**
  * controller
@@ -132,5 +133,16 @@ public class UserController {
 	public PageResult search(@RequestBody TbUser user, int page, int rows  ){
 		return userService.findPage(user, page, rows);		
 	}
+
+	@RequestMapping("/getLoginName")
+	public Map<String,String> getLoginName() {
+		//基于安全框架springsecurity获取登录人用户名
+		String loginName = SecurityContextHolder.getContext().getAuthentication().getName();
+		Map<String, String> map = new HashMap<>();
+		map.put("loginName", loginName);
+		return map;
+	}
+
+
 	
 }

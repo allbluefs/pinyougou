@@ -33,4 +33,7 @@ app.service('userService',function($http){
 	this.sendSmsCode=function (phone) {
 		return $http.get('../user/sendSmsCode.do?phone='+phone);
 	}
+	this.getLoginName=function () {
+		return $http.get('user/getLoginName.do');
+	}
 });

@@ -82,4 +82,10 @@ app.controller('userController' ,function($scope,$controller   ,userService){
 		})
 	};
 
+	$scope.getLoginName=function () {
+		userService.getLoginName().success(function (response) {
+			$scope.loginName=response.loginName;
+		})
+	}
+
 });	
