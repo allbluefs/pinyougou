@@ -108,6 +108,22 @@ public class CartServiceImpl implements CartService {
         redisTemplate.boundValueOps(username).set(carStr,7L, TimeUnit.DAYS);
     }
 
+    @Override
+    public List<Cart> mergeCartList(List<Cart> cartList_sessionId, List<Cart> cartList_username) {
+        for (Cart cart : cartList_sessionId) {
+            List<TbOrderItem> orderItemList = cart.getOrderItemList();
+            for (TbOrderItem orderItem : orderItemList) {
+                addItemToCartList(cartList_username,orderItem.getItemId(),orderItem.getNum());
+            }
+        }
+        return cartList_username;
+    }
+
+    @Override
+    public void deleteCartList(String sessionId) {
+        redisTemplate.delete(sessionId);
+    }
+
     //判断orderItemList中是否有item
     private TbOrderItem searchOrderItemFromCart(List<TbOrderItem> orderItemList, TbItem item) {
         for (TbOrderItem orderItem : orderItemList) {

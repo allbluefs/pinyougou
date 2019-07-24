@@ -45,11 +45,20 @@ public class CartController {
         List<Cart> cartList_sessionId = cartService.findCartListFromRedis(sessionId);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!username.equals("anonymousUser")){
+            System.out.println("select cartList by username");
             List<Cart> cartList_username = cartService.findCartListFromRedis(username);
+            if (cartList_sessionId != null && cartList_sessionId.size() > 0) {
+                cartList_username=cartService.mergeCartList(cartList_sessionId,cartList_username);
+                cartService.deleteCartList(sessionId);
+                cartService.addCartListToRedisByUserName(username,cartList_username);
+            }
             return cartList_username;
+        }else {
+            System.out.println("select cartList by sessionId");
+            return cartList_sessionId;
         }
 
-        return cartList_sessionId;
+
     }
 
     @RequestMapping("/addGoodsToCartList")
