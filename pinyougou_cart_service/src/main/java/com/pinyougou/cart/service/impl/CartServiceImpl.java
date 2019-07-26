@@ -9,6 +9,7 @@ import com.pinyougou.pojo.TbOrderItem;
 import groupEntity.Cart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @Date:2019/7/23
  */
 @Service
+@Transactional
 public class CartServiceImpl implements CartService {
     @Autowired
     private TbItemMapper itemMapper;

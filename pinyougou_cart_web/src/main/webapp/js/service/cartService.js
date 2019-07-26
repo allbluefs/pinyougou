@@ -8,4 +8,6 @@ app.service('cartService',function($http){
         return $http.get('cart/addGoodsToCartList.do?itemId='+itemId+'&num='+num);
     }
 
+
+
 });
