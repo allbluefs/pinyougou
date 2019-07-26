@@ -6,11 +6,13 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbOrderItemMapper;
 import com.pinyougou.mapper.TbOrderMapper;
+import com.pinyougou.mapper.TbPayLogMapper;
 import com.pinyougou.order.service.OrderService;
 import com.pinyougou.pojo.TbOrder;
 import com.pinyougou.pojo.TbOrderExample;
 import com.pinyougou.pojo.TbOrderExample.Criteria;
 import com.pinyougou.pojo.TbOrderItem;
+import com.pinyougou.pojo.TbPayLog;
 import entity.PageResult;
 import groupEntity.Cart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import utils.IdWorker;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +63,8 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private TbOrderItemMapper orderItemMapper;
+	@Autowired
+	private TbPayLogMapper payLogMapper;
 
 	/**
 	 * 增加
@@ -72,11 +77,15 @@ public class OrderServiceImpl implements OrderService {
 		if (carStr==null){
 			carStr="[]";
 		}
+		//支付总金额
+		double totalPayment=0.00;
+		List<String> orderList = new ArrayList<>();
 		List<Cart> cartList= JSON.parseArray(carStr,Cart.class);
 		for (Cart cart : cartList) {
 			TbOrder tbOrder = new TbOrder();
 //			`order_id` bigint(20) NOT NULL COMMENT '订单id',  //不是主键自增
 			Long orderId = idWorker.nextId();
+			orderList.add(orderId+"");
 			tbOrder.setOrderId(orderId);
 //		 `status` varchar(1) COLLATE utf8_bin DEFAULT NULL COMMENT '状态：1、未付款，2、已付款，3、未发货，4、已发货，5、交易成功，6、交易关闭,7、待评价',
 			tbOrder.setStatus("1");
@@ -101,6 +110,8 @@ public class OrderServiceImpl implements OrderService {
 				orderItem.setOrderId(orderId);
 				orderItemMapper.insert(orderItem);
 			}
+			//统计支付总金额
+			totalPayment+=payment;
 //		 `payment` decimal(20,2) DEFAULT NULL COMMENT '实付金额。精确到2位小数;单位:元。如:200.07，表示:200元7分',
 			tbOrder.setPayment(new BigDecimal(payment));
 
@@ -114,6 +125,30 @@ public class OrderServiceImpl implements OrderService {
 //	    `receiver` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT '收货人',
 			tbOrder.setReceiver(order.getReceiver());
 			orderMapper.insert(tbOrder);
+		}		//在线支付，记录支付日志
+		if ("1".equals(order.getPaymentType())) {
+			TbPayLog payLog = new TbPayLog();
+//			`out_trade_no` varchar(30) NOT NULL COMMENT '支付订单号',   //分布式存储 idWorker
+			payLog.setOutTradeNo(idWorker.nextId()+"");
+//		  `create_time` datetime DEFAULT NULL COMMENT '创建日期',
+			payLog.setCreateTime(new Date());
+//		  `total_fee` bigint(20) DEFAULT NULL COMMENT '支付金额（分）',//针对当前这笔支付的所有订单要支付的总金额
+			payLog.setTotalFee((long)(totalPayment*100)); // 0
+			//payLog.setTotalFee(Long.parseLong(totalPayment*100+"")); // 0.0.1  1.0
+//		  `user_id` varchar(50) DEFAULT NULL COMMENT '用户ID',
+			payLog.setUserId(userId);
+//		  `trade_state` varchar(1) DEFAULT NULL COMMENT '交易状态',
+			payLog.setTradeState("1");
+//		  `order_list` varchar(200) DEFAULT NULL COMMENT '订单编号列表',  //一笔支付可能对应多笔订单  1,2,3
+			// [1 ,2 ,3]
+			payLog.setOrderList(orderList.toString().replace("[","").replace("]","").replace(" ",""));
+//		  `pay_type` varchar(1) DEFAULT NULL COMMENT '支付类型',  //微信支付 1
+			payLog.setPayType("1");
+			payLogMapper.insert(payLog);
+
+			//将支付信息存入缓存
+			redisTemplate.boundHashOps("payLog").put(userId,payLog);
+
 		}
 
 		//完成订单保存后，需要清除购物车列表数据
